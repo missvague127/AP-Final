@@ -5,3 +5,9 @@ pass CHAR(50)
 phone INTEGER
 email CHAR(100)
 joined TIMESTAMP
+
+accounts
+ownerNcode INTEGER
+pass CHAR(50)
+balance INTEGER
+createTime TIMESTAMP
