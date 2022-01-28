@@ -20,3 +20,7 @@ def handleQuery(q):
         return
 
     return
+
+
+
+#1.read schema file and generate files if not exist

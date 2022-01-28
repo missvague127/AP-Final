@@ -1,3 +1,4 @@
+from cgitb import text
 from functools import partial
 from tkinter import *
 import client
@@ -6,36 +7,54 @@ import PageUI_signup
 def makeLoginUI():
     mainWindow= Tk()
     mainWindow.title("client")
-    mainWindow.geometry('600x400')
+    mainWindow.geometry('300x300')
 
-    #username label and username entry box
-    usernameLabel = Label(mainWindow, text="User Name").grid(row=0, column=0)
-    musername = StringVar()
-    usernameEntry = Entry(mainWindow, textvariable=musername).grid(row=0, column=1)  
+    #---------------------------------------------------------------nathional code  
+    lbl_ncode = Label(mainWindow, text="national code: ")
+    lbl_ncode.place(x=20 , y=20 )
 
-    #password label and password entry box
-    passwordLabel = Label(mainWindow,text="Password").grid(row=1, column=0)  
-    mpassword = StringVar()
-    passwordEntry = Entry(mainWindow, textvariable=mpassword, show='*').grid(row=1, column=1)  
+    ncode=StringVar(mainWindow)
+    te_ncode=Entry(mainWindow , textvariable=ncode)
+    te_ncode.place(x=130 , y=20)
+    
+    #---------------------------------------------------------------password
+    lbl_pass=Label(mainWindow , text="password :")
+    lbl_pass.place(x=20 , y=50 )
 
-    def validateLogin(u ,p):
-        
-        client.request_login(u.get() , p.get())
+    pass1=StringVar(mainWindow)
+    te_pass=Entry(mainWindow , textvariable=pass1)
+    te_pass.place(x=130 , y=50)
+
+    #--------------------------------------------------------------- sign in button
+    def validateLogin():
+        lbl_result.config(text="")
+        #check if fields are not empty
+        if(ncode.get()=="" or pass1.get()==""):
+            lbl_result.config(text="filds cant be empty!!")
+            return
+        client.request_login(ncode.get() , pass1.get())
         return
 
-    #login button
-    validateLogin = partial(validateLogin , musername , mpassword)
-    loginButton = Button(mainWindow, text="Login", command=validateLogin).grid(row=1, column=2)  
-
-    signUpLabel = Label(mainWindow, text="or you can sign up").grid(row=2, column=0)
+    btn_signin = Button(mainWindow, text="Login", command=validateLogin)
+    btn_signin.place(relx=0.5 , y=100 , anchor = CENTER)
 
 
-    def signNewUser(m):
+    #---------------------------------------------------------------result
+    lbl_result=Label(mainWindow , text="")
+    lbl_result.place(relx=0.5 , y=140 , anchor = CENTER)
+
+
+    #--------------------------------------------------------------- sign up
+    lbl_signUp = Label(mainWindow, text="or you can sign up")
+    lbl_signUp.place(relx=0.5 , y=170 , anchor = CENTER)
+
+    def signupButtonCommand():
         ## make a insert query and call database function
-        PageUI_signup.makeSignUpUI(m)
+        PageUI_signup.makeSignUpUI(mainWindow)
         return
-    signNewUser = partial(signNewUser , mainWindow)
-    signUpButton = Button(mainWindow, text="Sign up", command=signNewUser).grid(row=3, column=0)
+    #signNewUser = partial(signNewUser , mainWindow)
+    btn_signup = Button(mainWindow, text="Sign up", command=signupButtonCommand)
+    btn_signup.place(relx=0.5 , y=200 , anchor = CENTER)
 
     mainWindow.mainloop()
 
