@@ -30,8 +30,8 @@ def makeLoginUI():
         lbl_result.config(text="")
         #check if fields are not empty
         if(ncode.get()=="" or pass1.get()==""):
-            lbl_result.config(text="filds cant be empty!!")
-            return
+            lbl_result.config(text="fields cant be empty!!")
+            return   
         client.request_login(ncode.get() , pass1.get())
         return
 
