@@ -1,0 +1,7 @@
+users
+name CHAR(50)
+ncode UNIQUE INTEGER
+pass CHAR(50)
+phone INTEGER
+email CHAR(100)
+joined TIMESTAMP
