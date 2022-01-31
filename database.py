@@ -1,3 +1,7 @@
+class Response():
+    def __init__(self , result , entries):
+        self.result = result
+        self.entries = entries
 
 def handleQuery(q):
 
@@ -9,7 +13,7 @@ def handleQuery(q):
 
     if(qs[0] == "SELECT"):
         ## handle it ass select query
-        return
+        return handleSelectQuery(q)
 
     if(qs[0] == "UPDATE"):
         ## handle it ass update query
@@ -21,6 +25,12 @@ def handleQuery(q):
 
     return
 
+def handleSelectQuery(q):
+
+    parts = q.split()
+    tableName=parts[2]
+
+    return
 
 
 #1.read schema file and generate files if not exist
