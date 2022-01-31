@@ -26,7 +26,7 @@ def makeLoginUI():
     te_pass.place(x=130 , y=50)
 
     #--------------------------------------------------------------- sign in button
-    def validateLogin():
+    def click_btn_login():
         lbl_result.config(text="")
         #check if fields are not empty
         if(ncode.get()=="" or pass1.get()==""):
@@ -35,7 +35,7 @@ def makeLoginUI():
         client.request_login(ncode.get() , pass1.get())
         return
 
-    btn_signin = Button(mainWindow, text="Login", command=validateLogin)
+    btn_signin = Button(mainWindow, text="Login", command=click_btn_login)
     btn_signin.place(relx=0.5 , y=100 , anchor = CENTER)
 
 
@@ -48,12 +48,12 @@ def makeLoginUI():
     lbl_signUp = Label(mainWindow, text="or you can sign up")
     lbl_signUp.place(relx=0.5 , y=170 , anchor = CENTER)
 
-    def signupButtonCommand():
+    def click_btn_signup():
         ## make a insert query and call database function
         PageUI_signup.makeSignUpUI(mainWindow)
         return
     #signNewUser = partial(signNewUser , mainWindow)
-    btn_signup = Button(mainWindow, text="Sign up", command=signupButtonCommand)
+    btn_signup = Button(mainWindow, text="Sign up", command=click_btn_signup)
     btn_signup.place(relx=0.5 , y=200 , anchor = CENTER)
 
     mainWindow.mainloop()

@@ -60,15 +60,15 @@ def makeSignUpUI(parrentWin):
     te_email.place(x=130 , y=170)
 
     #--------------------------------------------------------------- sign up button
-    def signupButtonCommand():
+    def click_btn_signup():
          #check if password are the same
          if (pass1.get() != pass2.get()):
               lbl_result.config(text="pppppppppp")
          return
      
-    #signupButtonCommand = partial(signupButtonCommand,name,ncode,pass1,pass2,phone,email)
-    btn_SignUp = Button(win , text = "Sign Up" , command=signupButtonCommand)
-    btn_SignUp.place(relx=0.5 , y=220 , anchor = CENTER)
+    #click_btn_signup = partial(click_btn_signup,name,ncode,pass1,pass2,phone,email)
+    btn_signup = Button(win , text = "Sign Up" , command=click_btn_signup)
+    btn_signup.place(relx=0.5 , y=220 , anchor = CENTER)
 
      #---------------------------------------------------------------result
     lbl_result=Label(win , text="")
