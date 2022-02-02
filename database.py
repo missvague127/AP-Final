@@ -1,15 +1,27 @@
 from operator import truediv
 from optparse import Values
 
+class Table():
+    def __init__(self , name , fields):
+        self.name=name
+        self.fields=fields
+
+class Field():
+    def __init__(self , name ,isUnique , type , typeLimit):
+        self.name = name
+        self.isUnique = isUnique
+        self.type = type
+        self.typeLimit = typeLimit
+
 
 class Response():
-    def __init__(self , result , entries):
+    def __init__(self , result ,message , entries ):
         self.result = result
+        self.message=message
         self.entries = entries
 
 class MyEntry():
     id
-
 class UserEntry(MyEntry):
     def __init__(self , name , ncode , _pass , phone , email , joined):
         self.name=name
@@ -35,7 +47,7 @@ def handleQuery(q):
 
     if(qs[0] == "INSERT"):
         ## handle it ass insert query
-        return
+        return handleInsertQuery(q)
 
     if(qs[0] == "SELECT"):
         ## handle it ass select query
@@ -51,6 +63,8 @@ def handleQuery(q):
 
     return
 
+
+#------------------------------------------------------------------------handle select query an conditions
 def handleSelectQuery(q):
 
     parts = q.split()
@@ -61,9 +75,9 @@ def handleSelectQuery(q):
     entries= condResult(tableName,conditions)
 
     if (len(entries)==0):
-        return Response("unsuccess" , entries)
+        return Response("unsuccess","no entries found" , entries)
 
-    return Response("success" , entries)
+    return Response("success" , "", entries)
 
 def condResult(t , c):
     if(c[1]=="(" and c[len(c)-2]==")"):
@@ -99,7 +113,7 @@ def OneCondResult(t,c):
 
     lines = f.readlines()
     fields=lines[0].split("\t")
-
+    
     for i in range(1,len(lines)):
         for j in range(len(fields)):
             if (fields[j].strip()==field.strip()):
@@ -133,11 +147,76 @@ def ANDFunc(a,b):
     
     return ret
 
+#------------------------------------------------------------------------handle insert query 
+def handleInsertQuery(q):
+    parts = q.split()
+    tableName=parts[2].strip()
 
-        
+    values= (q[q.find("VALUES")+8:len(q)-2]).strip().split(',')
+
+    #------------------------------------------check tables conditions
+    for i in range(len(tables)):
+        if(tableName == tables[i].name):
+            entry=""
+            for j in range(len(values)):
+                thisField = tables[i].fields[j]
+                if (checkFiledType(thisField.type , values[j])):
+                    if(thisField.type=="CHAR"):
+                        if(checkFieldLen(thisField.typeLimit , values[i])):
+                            pass
+                        else:
+                            return Response("unsuccess" , "lenght limit for {field} is {limit}".format(field=thisField.name , limit=thisField.typeLimit), [])
+                else:
+                    return Response("unsuccess" ,"type of {field} should be {typeof}".format(field=thisField.name , typeof=thisField.type), [])
+                #check if value should be unique
+                if(thisField.isUnique):
+                    if(checkUnique(tableName , thisField.name, values[j])):
+                        return Response("unsuccess" , "{field} should be unique".format(field=thisField.name), [])
+                    pass
+                entry=entry+values[j]+"\t"
+            fa=open("_"+tableName.strip()+".txt" , 'a')
+            fa.write("\n"+entry)
+            fa.close()
+            return Response("success" ,"" , [entry])
+
+def checkFiledType(type , value):
+    if (type == "INTEGER"):
+        try:
+            int(value)
+            return True
+        except:
+            return False
+    return True
+
+def checkFieldLen(limit , value):
+    if(len(value) <= limit):
+        return True
+    else:
+        return False
+    return False
+
+def checkUnique(t ,field, value):
+    fr =open("_"+t+".txt" , 'r')
+    lines=fr.readlines()
+
+    fields=lines[0].split("\t")
+    
+    for i in range(1,len(lines)):
+        parts=lines[i].split()
+        for j in range(len(parts)):
+            if(field == fields[j]):
+                if(parts[j] == value):
+                    return True
+    
+    return False
 
 
+    
+
+
+k=0
 #1.read schema file and generate files if not exist
+tables = []
 sch = open("schema.txt")
 
 lines= sch.readlines()
@@ -148,6 +227,7 @@ for i in range(len(lines)):
         tableName = lines[i]
         fa=open("_"+tableName.strip()+".txt" , 'a')
         fr=open("_"+tableName.strip()+".txt" , 'r')
+        
         if(len(fr.readlines())==0):
             for j in range(i+1 , len(lines)):
                 if(lines[j].strip()==""):
@@ -155,3 +235,29 @@ for i in range(len(lines)):
                     break
                 fa.write(lines[j].split()[0]+"\t")
             fa.close()
+
+for i in range(len(lines)):
+    parts = lines[i].split()
+    if (len(parts)==1):
+        tableName = lines[i].strip()
+        newTable= Table(tableName,[])
+        for j in range(i+1 , len(lines)):
+            if(lines[j].strip()==""):
+                break
+            fieldName = lines[j].split()[0]
+            fieldType=lines[j].split()[len(lines[j].split())-1]
+            fieldLimit=10000
+            if(fieldType.find("(")!=-1):
+                tesst=fieldType[fieldType.find("(")+1:fieldType.find(")")]
+                fieldLimit=int(tesst)
+                fieldType=fieldType[:fieldType.find("(")]
+            
+            fieldIsU=False
+            if(len(lines[j].split())==3):
+                fieldIsU=True
+            
+            newField=Field(fieldName,fieldIsU,fieldType,fieldLimit)
+            newTable.fields.append(newField)
+        tables.append(newTable)
+
+
