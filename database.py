@@ -1,10 +1,12 @@
 from operator import truediv
+from optparse import Values
 
 
 class Response():
     def __init__(self , result , entries):
         self.result = result
         self.entries = entries
+
 class MyEntry():
     id
 
@@ -22,6 +24,9 @@ class UserEntry(MyEntry):
             if(self.phone == other.phone and self.email == other.email and self.joined == other.joined):
                 return True
         return False
+    
+    def __str__(self):
+        return self.name+"#"+self.ncode+"#"+self._pass+"#"+self.phone+"#"+self.email+"#"+self.joined
 
 
 def handleQuery(q):
@@ -53,22 +58,29 @@ def handleSelectQuery(q):
 
     conditions= "("+q[q.find("WHERE")+6:]+")"
     print(conditions)
+    entries= condResult(tableName,conditions)
 
-    return
+    if (len(entries)==0):
+        return Response("unsuccess" , entries)
+
+    return Response("success" , entries)
 
 def condResult(t , c):
+    if(c[1]=="(" and c[len(c)-2]==")"):
+        return condResult(t , c[1:len(c)-2])
     if (c.find("OR") == -1 and c.find("AND") == -1 and c.find("(") == -1 and c.find(")") == -1):
         return OneCondResult(t,c)
     tt=0
-    for i in range(len(c)):
+    for i in range(1,len(c)):
         if(c[i]== "("):
-            t=t+1
+            tt=tt+1
         elif(c[i] == ")"):
-            t=t-1
-        elif(c[i:i+1] == "OR" and t==0):
+            tt=tt-1
+        elif(c[i:i+2] == "OR" and tt==0):
             return ORFunc(condResult(t,c[1:i-1]) , condResult(t,c[i+2:len(c)-1]))
-        elif(c[i:i+2] == "AND" and t==0):
+        elif(c[i:i+3] == "AND" and tt==0):
             return ANDFunc(condResult(t,c[1:i-1]) , condResult(t,c[i+3:len(c)-1]))
+        tc=c[i:i+3]
 
 def OneCondResult(t,c):
     ret = []
@@ -80,12 +92,23 @@ def OneCondResult(t,c):
 
     elif (c.find("==") != -1):
         parts=c.split("==")
-        field , value = parts[0].strip() , parts[1].strip()
+        field , value = parts[0].strip() , parts[1].strip().replace("\"" , "")
     
     fileName= "_"+t+".txt"
     f = open(fileName , 'r')
 
     lines = f.readlines()
+    fields=lines[0].split("\t")
+
+    for i in range(1,len(lines)):
+        for j in range(len(fields)):
+            if (fields[j].strip()==field.strip()):
+                values = lines[i].split()
+                if (values[j].strip() == value):
+                    if(t=="users"):
+                        entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+                        ret.append(entry)
+    return ret
     
         
 def ORFunc(a,b):
@@ -97,7 +120,7 @@ def ORFunc(a,b):
                 found=1
                 break
         if(found == 0):
-            ret=[b,a[i]]
+            ret.append(a[i])
     return ret
 
 def ANDFunc(a,b):
@@ -105,7 +128,7 @@ def ANDFunc(a,b):
     for i in range(len(a)):
         for j in range(len(b)):
             if(a[i] == b[j]):
-                ret = [ret , b[j]]
+                ret.append(b[j])
                 break
     
     return ret
