@@ -1,6 +1,7 @@
 from cProfile import label
 from functools import partial
 from textwrap import fill
+from time import sleep
 from tkinter import *
 
 import client
@@ -62,14 +63,19 @@ def makeSignUpUI(parrentWin):
 
     #--------------------------------------------------------------- sign up button
     def click_btn_signup():
-         #check if password are the same
-          if (pass1.get() != pass2.get()):
-              lbl_result.config(text="passwords should match")
-              return
-          res=client.request_signup(name.get(),ncode.get(),pass1.get(),phone.get(),email.get())
-          if(res.result=="unsuccess"):
-              lbl_result.config(text=res.message)
-          return
+        #check if password are the same
+        if (pass1.get() != pass2.get()):
+            lbl_result.config(text="passwords should match")
+            return
+        res=client.request_signup(name.get(),ncode.get(),pass1.get(),phone.get(),email.get())
+        if(res.result=="unsuccess"):
+            lbl_result.config(text=res.message)
+            return
+        else:
+            lbl_result.config(text="sign up successfull close this window\nand log in to your account")
+  
+        
+        return
      
     #click_btn_signup = partial(click_btn_signup,name,ncode,pass1,pass2,phone,email)
     btn_signup = Button(win , text = "Sign Up" , command=click_btn_signup)

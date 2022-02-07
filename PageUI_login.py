@@ -3,6 +3,7 @@ from functools import partial
 from tkinter import *
 import client
 import PageUI_signup
+import PageUI_dashboard
 
 def makeLoginUI():
     mainWindow= Tk()
@@ -35,7 +36,10 @@ def makeLoginUI():
         res = client.request_login(ncode.get() , pass1.get())
         if(res.result=="success"):
             #open dashboard UI
+            PageUI_dashboard.makeDashboardUI(mainWindow)
             pass
+        else:
+            lbl_result.config(text="login was not successfull!!")
         return
 
     btn_signin = Button(mainWindow, text="Login", command=click_btn_login)

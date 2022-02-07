@@ -9,6 +9,5 @@ joined TIMESTAMP
 accounts
 accnumber UNIQUE INTEGER
 ownerNcode INTEGER
-pass CHAR(50)
 balance INTEGER
 createTime TIMESTAMP

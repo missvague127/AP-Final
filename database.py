@@ -40,6 +40,22 @@ class UserEntry(MyEntry):
     def __str__(self):
         return self.name+"#"+self.ncode+"#"+self._pass+"#"+self.phone+"#"+self.email+"#"+self.joined
 
+class AccountEntry(MyEntry):
+    def __init__(self , accnumber , ownerNcode , balance , createTime):
+        self.accnumber=accnumber
+        self.ownerNcode =ownerNcode
+        self.balance=balance
+        self.createTime=createTime
+    
+    def __eq__(self , other):
+        if (self.accnumber == other.accnumber and self.ownerNcode == other.ownerNcode ):
+            if(self.createTime == other.createTime and self.balance==other.balance):
+                return True
+        return False
+    
+    def __str__(self):
+        return self.accnumber+"#"+self.ownerNcode+"#"+self.balance+"#"+self.createTime
+
 
 def handleQuery(q):
 
@@ -64,7 +80,7 @@ def handleQuery(q):
     return
 
 
-#------------------------------------------------------------------------handle select query an conditions
+#------------------------------------------------------------------------handle select query and conditions
 def handleSelectQuery(q):
 
     parts = q.split()
@@ -81,8 +97,8 @@ def handleSelectQuery(q):
 
 def condResult(t , c):
     if(c[1]=="(" and c[len(c)-2]==")"):
-        return condResult(t , c[1:len(c)-2])
-    if (c.find("OR") == -1 and c.find("AND") == -1 and c.find("(") == -1 and c.find(")") == -1):
+        return condResult(t , c[1:len(c)-1])
+    if (c.find("OR") == -1 and c.find("AND") == -1 and c[1:len(c)-1].find("(") == -1 and c[1:len(c)-1].find(")") == -1):
         return OneCondResult(t,c)
     tt=0
     for i in range(1,len(c)):
@@ -102,11 +118,11 @@ def OneCondResult(t,c):
     value =""
     if (c.find("!=") != -1):
         parts=c.split("!=")
-        field , value = parts[0] , parts[1]
+        field , value = parts[0].strip().replace("\"" , "").replace("(","").replace(")","") , parts[1].strip().replace("\"" , "").replace("(","").replace(")","")
 
     elif (c.find("==") != -1):
         parts=c.split("==")
-        field , value = parts[0].strip() , parts[1].strip().replace("\"" , "")
+        field , value = parts[0].strip().replace("\"" , "").replace("(","").replace(")","") , parts[1].strip().replace("\"" , "").replace("(","").replace(")","")
     
     fileName= "_"+t+".txt"
     f = open(fileName , 'r')
@@ -122,6 +138,10 @@ def OneCondResult(t,c):
                     if(t=="users"):
                         entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
                         ret.append(entry)
+                    elif(t=="accounts"):
+                        entry = AccountEntry(values[0],values[1],values[2],values[3])
+                        ret.append(entry)
+
     return ret
     
         
@@ -177,6 +197,10 @@ def handleInsertQuery(q):
             fa=open("_"+tableName.strip()+".txt" , 'a')
             fa.write("\n"+entry)
             fa.close()
+            if(tableName=="users"):
+                entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+            elif(tableName=="accounts"):
+                entry = AccountEntry(values[0],values[1],values[2],values[3])
             return Response("success" ,"" , [entry])
 
 def checkFiledType(type , value):

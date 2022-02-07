@@ -1,4 +1,5 @@
 from calendar import day_abbr
+import random
 import PageUI_login
 import database
 import time
@@ -24,4 +25,20 @@ def request_signup(name, ncode, _pass, phone, email):
 
     k=9
     return res
+
+def request_getAccounts(ncode):
+    query = "SELECT FROM accounts WHERE (ownerNcode==\"{ncode}\")"
+    query = query.format(ncode = ncode)
+    res = database.handleQuery(query)
+    return res
+
+def request_openAccount(ncode):
+    query = "INSERT INTO accounts VALUES ({accnumber},{uncode},{balance},{utime});"
+    rand=random.SystemRandom()
+    query = query.format(accnumber = rand.randint(10000000, 99999999) , uncode=ncode , balance=rand.randint(50, 100) , utime=time.time())
+    res = database.handleQuery(query)
+    if(res.result == "success"):
+        return request_getAccounts(ncode)
+    else:
+        return res
 
