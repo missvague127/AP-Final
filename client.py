@@ -5,6 +5,7 @@ import database
 import time
 
 user=""
+userAccounts=""
 #this method is called inside ui
 def request_login(username , password):
     # create a select query and ask database
@@ -14,7 +15,7 @@ def request_login(username , password):
     if(res.result == "success"):
         global user
         user = res.entries[0]
-    print(query)
+    #print(query)
     return res
 
 
@@ -30,15 +31,39 @@ def request_getAccounts(ncode):
     query = "SELECT FROM accounts WHERE (ownerNcode==\"{ncode}\")"
     query = query.format(ncode = ncode)
     res = database.handleQuery(query)
+    global userAccounts
+    userAccounts = res.entries
     return res
 
-def request_openAccount(ncode):
-    query = "INSERT INTO accounts VALUES ({accnumber},{uncode},{balance},{utime});"
+def request_openFirstAccount(ncode , alias):
+    query = "INSERT INTO accounts VALUES ({accnumber},{uncode},{balance},{alias1},{fav},{utime});"
     rand=random.SystemRandom()
-    query = query.format(accnumber = rand.randint(10000000, 99999999) , uncode=ncode , balance=rand.randint(50, 100) , utime=time.time())
+    query = query.format(accnumber = rand.randint(10000000, 99999999) , uncode=ncode , balance=rand.randint(50, 100) , alias1=alias ,fav='False' , utime=time.time())
     res = database.handleQuery(query)
     if(res.result == "success"):
-        return request_getAccounts(ncode)
+        ret=request_getAccounts(ncode)
+        global userAccounts
+        userAccounts = ret.entries
+        return ret
     else:
         return res
 
+def request_addMoreAccount(ncode , alias, AccNumber, initBalance):
+    #print(ncode , alias , AccNumber , initBalance)
+    if(int(initBalance) > int(AccNumber.split()[3])):
+        return database.Response("unsuccess" , "initial balance should be less than host acount balance" , [])
+    else:
+        pass
+        #update old acount
+        #create new account
+
+    return
+
+def request_deleteAccount(AccNumber):
+    query = "DELETE FROM accounts WHERE (accnumber==\"{accnumber}\")"
+    query = query.format(accnumber = AccNumber)
+    res = database.handleQuery(query)
+    if (res.result=="success"):
+        global userAccounts
+        userAccounts=res.entries
+    return res

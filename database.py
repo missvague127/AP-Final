@@ -1,6 +1,3 @@
-from operator import truediv
-from optparse import Values
-
 class Table():
     def __init__(self , name , fields):
         self.name=name
@@ -38,23 +35,30 @@ class UserEntry(MyEntry):
         return False
     
     def __str__(self):
-        return self.name+"#"+self.ncode+"#"+self._pass+"#"+self.phone+"#"+self.email+"#"+self.joined
+        return self.name+"\t"+self.ncode+"\t"+self._pass+"\t"+self.phone+"\t"+self.email+"\t"+self.joined
 
 class AccountEntry(MyEntry):
-    def __init__(self , accnumber , ownerNcode , balance , createTime):
+    def __init__(self , accnumber , ownerNcode , balance , alias, fav,createTime):
         self.accnumber=accnumber
         self.ownerNcode =ownerNcode
         self.balance=balance
+        self.alias=alias
+        self.fav=fav
         self.createTime=createTime
     
     def __eq__(self , other):
         if (self.accnumber == other.accnumber and self.ownerNcode == other.ownerNcode ):
             if(self.createTime == other.createTime and self.balance==other.balance):
-                return True
+                if(self.alias==other.alias and self.fav== other.fav):
+                    return True
         return False
     
     def __str__(self):
-        return self.accnumber+"#"+self.ownerNcode+"#"+self.balance+"#"+self.createTime
+        return self.accnumber+"\t"+self.ownerNcode+"\t"+self.balance+"\t"+self.alias+"\t"+self.fav+"\t"+self.createTime
+    
+    def prettyStr(self):
+        return self.accnumber+" "+self.alias+" "+self.balance
+
 
 
 def handleQuery(q):
@@ -75,7 +79,7 @@ def handleQuery(q):
 
     if(qs[0] == "DELETE"):
         ## handle it ass delete query
-        return
+        return handleDeleteQuery(q)
 
     return
 
@@ -87,7 +91,7 @@ def handleSelectQuery(q):
     tableName=parts[2]
 
     conditions= "("+q[q.find("WHERE")+6:]+")"
-    print(conditions)
+    #print(conditions)
     entries= condResult(tableName,conditions)
 
     if (len(entries)==0):
@@ -139,7 +143,7 @@ def OneCondResult(t,c):
                         entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
                         ret.append(entry)
                     elif(t=="accounts"):
-                        entry = AccountEntry(values[0],values[1],values[2],values[3])
+                        entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
                         ret.append(entry)
 
     return ret
@@ -165,6 +169,25 @@ def ANDFunc(a,b):
                 ret.append(b[j])
                 break
     
+    return ret
+
+def selectAll(t):
+    ret =[]
+    fileName= "_"+t+".txt"
+    f = open(fileName , 'r')
+
+    lines = f.readlines()
+    fields=lines[0].split("\t")
+    
+    for i in range(1,len(lines)):
+        values = lines[i].strip().split("\t")
+        if(t=="users"):
+            entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+            ret.append(entry)
+        elif(t=="accounts"):
+            entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+            ret.append(entry)
+
     return ret
 
 #------------------------------------------------------------------------handle insert query 
@@ -200,7 +223,7 @@ def handleInsertQuery(q):
             if(tableName=="users"):
                 entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
             elif(tableName=="accounts"):
-                entry = AccountEntry(values[0],values[1],values[2],values[3])
+                entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
             return Response("success" ,"" , [entry])
 
 def checkFiledType(type , value):
@@ -209,6 +232,11 @@ def checkFiledType(type , value):
             int(value)
             return True
         except:
+            return False
+    elif(type == "BOOLEAN"):
+        if(value.lower() == "true" or value.lower() == "false"):
+            return True
+        else:
             return False
     return True
 
@@ -234,6 +262,45 @@ def checkUnique(t ,field, value):
     
     return False
 
+#------------------------------------------------------------------------handle delete query 
+def handleDeleteQuery(q):
+    parts = q.split()
+    tableName=parts[2]
+
+    conditions= "("+q[q.find("WHERE")+6:]+")"
+    #1. select entries to be deleted
+    entries= condResult(tableName,conditions)
+    if (len(entries)==0):
+        return Response("unsuccess","no entries matches the conditions" , entries)
+
+    #2. select all entries
+    allEntries=selectAll(tableName)
+    i=0
+    while( i < len(allEntries)):
+        for j in range(len(entries)):
+            #print(i,len(allEntries) ,j, len(entries))
+            if (allEntries[i] == entries[j]):
+                allEntries.pop(i)
+                j=len(entries)
+        i=i+1
+    
+    fr =open("_"+tableName+".txt" , 'r')
+    lines=fr.readlines()
+
+    fields=lines[0]#.split("\t")
+
+    fw =open("_"+tableName+".txt" , 'w')
+    fw.close()
+
+    fa =open("_"+tableName+".txt" , 'a')
+    fa.write(fields)
+    for i in range(len(allEntries)):
+        fa.write(str(allEntries[i])+"\n")
+    fa.close()
+
+    
+
+    return Response("success" , "", allEntries)
 
     
 

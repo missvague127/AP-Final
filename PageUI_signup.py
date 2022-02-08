@@ -90,7 +90,7 @@ def makeSignUpUI(parrentWin):
 
 
     def on_closing():
-         print("subwindow endded")
+         #print("subwindow endded")
          parrentWin.deiconify()
          win.destroy()
         
