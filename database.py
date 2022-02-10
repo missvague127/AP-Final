@@ -75,7 +75,7 @@ def handleQuery(q):
 
     if(qs[0] == "UPDATE"):
         ## handle it ass update query
-        return
+        return handleUpdateQuery(q)
 
     if(qs[0] == "DELETE"):
         ## handle it ass delete query
@@ -302,7 +302,50 @@ def handleDeleteQuery(q):
 
     return Response("success" , "", allEntries)
 
+#------------------------------------------------------------------------handle update query 
+def handleUpdateQuery(q):
+    parts = q.split()
+    tableName=parts[1]
+
+    conditions= "("+q[q.find("WHERE")+6:q.find("VALUES")-1]+")"
+    values = q[q.find("VALUES")+7:].split(',')
+    #1. select entries to be deleted
+    entries= condResult(tableName,conditions)
+    if (len(entries)==0):
+        return Response("unsuccess","no entries matches the conditions" , entries)
+
+    #2. delete those found in 1
+    allEntries=selectAll(tableName)
+    i=0
+    while( i < len(allEntries)):
+        for j in range(len(entries)):
+            #print(i,len(allEntries) ,j, len(entries))
+            if (allEntries[i] == entries[j]):
+                allEntries.pop(i)
+                j=len(entries)
+        i=i+1
     
+    for i in range(len(entries)):
+         entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+         allEntries.append(entry)
+
+    fr =open("_"+tableName+".txt" , 'r')
+    lines=fr.readlines()
+
+    fields=lines[0]#.split("\t")
+
+    fw =open("_"+tableName+".txt" , 'w')
+    fw.close()
+
+    fa =open("_"+tableName+".txt" , 'a')
+    fa.write(fields)
+    for i in range(len(allEntries)):
+        fa.write(str(allEntries[i])+"\n")
+    fa.close()
+    return Response("success" , "" , [])
+
+
+
 
 
 k=0
