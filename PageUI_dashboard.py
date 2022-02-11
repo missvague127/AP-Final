@@ -5,6 +5,7 @@ import PageUI_newFirstAcc
 import PageUI_newAcc
 import PageUI_deleteAcc
 import PageUI_transfer
+import PageUI_transactions
 
 lbx_accounts=""
 
@@ -78,6 +79,16 @@ def makeDashboardUI(parrentWin):
 
     btn_transfer = Button(win , text = "   transfer   " , command=click_btn_transfer )
     btn_transfer.place(relx=1 , x=-5 ,y=80 , anchor = NE)
+
+
+    def click_btn_transactions():
+        
+        PageUI_transactions.makeTransactionUI(win)
+        return
+
+    btn_transaction = Button(win , text = "   transactions   " , command=click_btn_transactions )
+    btn_transaction.place(relx=1 , x=-5 ,y=110 , anchor = NE)
+
 
     def click_btn_refresh():
         global lbx_accounts

@@ -159,7 +159,16 @@ def request_Transfer(accFrom , accTo , amount):
     if(res3.result == "unsuccess"):
         return res3
 
-    return res3
+
+    query5 = "INSERT INTO transaction VALUES ({v1},{v2},{v3},{v4},{v5});"
+    rand=random.SystemRandom()
+    newAccNumber=rand.randint(10000000, 99999999)
+    query5 = query5.format(v1 =accFrom  , v2=accTo , v3=amount , v4=time.time() ,v5='Description')
+    res5 = database.handleQuery(query5)
+    if(res5.result == "unsuccess"):
+        return res5
+
+    return res5
 
 def request_TransferByAlias(accFrom , alias , amount):
     query1 = "SELECT FROM accounts WHERE (alias==\"{a}\")"
@@ -174,7 +183,22 @@ def request_TransferByAlias(accFrom , alias , amount):
     return request_Transfer(accFrom , accountTo.accnumber , amount)
 
 
+def request_Transactions(ncode):
+    accounts = request_getAccounts(ncode).entries
 
+    transactions=[]
+
+    
+    for i in range(len(accounts)):
+        query1 = "SELECT FROM transaction WHERE (accfrom==\"{v1}\" OR accto==\"{v2}\")"
+        query1 = query1.format(v1 = accounts[i].accnumber , v2=accounts[i].accnumber)
+        res1 = database.handleQuery(query1)
+        for j in range(len(res1.entries)):
+            transactions.append(res1.entries[j])
+
+    return transactions
+        
+    
 
 
 

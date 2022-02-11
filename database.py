@@ -77,6 +77,9 @@ class TransactionEntry(MyEntry):
     def __str__(self):
         return self.accfrom+"\t"+self.accto+"\t"+self.amount+"\t"+self.time+"\t"+self.desc
 
+    def prettyStr(self):
+        return self.accfrom+"  -->  "+self.accto+"    "+self.amount
+
     
 
 
@@ -165,6 +168,9 @@ def OneCondResult(t,c):
                     elif(t=="accounts"):
                         entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
                         ret.append(entry)
+                    elif(t=="transaction"):
+                        entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
+                        ret.append(entry)
 
     return ret
     
@@ -207,6 +213,9 @@ def selectAll(t):
         elif(t=="accounts"):
             entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
             ret.append(entry)
+        elif(t=="transaction"):
+            entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
+            ret.append(entry)
 
     return ret
 
@@ -244,6 +253,8 @@ def handleInsertQuery(q):
                 entry = UserEntry(values[0],values[1],values[2],values[3],values[4],values[5])
             elif(tableName=="accounts"):
                 entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+            elif(tableName=="transaction"):
+                entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
             return Response("success" ,"" , [entry])
 
 def checkFiledType(type , value):

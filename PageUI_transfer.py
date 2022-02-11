@@ -53,7 +53,7 @@ def makeTransferUI(parrentWin):
        
         return
 
-    btn_transfer = Button(win , text = "   transfer   " , command=click_btn_transfer )
+    btn_transfer = Button(win , text = "   transfer by account number   " , command=click_btn_transfer )
     btn_transfer.place(x=220 ,y=80)
 
 
@@ -88,7 +88,7 @@ def makeTransferUI(parrentWin):
        
         return
 
-    btn_transferalias = Button(win , text = "   transfer   " , command=click_btn_transferalias )
+    btn_transferalias = Button(win , text = "   transfer by alias   " , command=click_btn_transferalias )
     btn_transferalias.place(x=220 ,y=110)
 
 
