@@ -10,6 +10,13 @@ accounts
 accnumber UNIQUE INTEGER
 ownerNcode INTEGER
 balance INTEGER
-alias CHAR(50)
+alias UNIQUE CHAR(50)
 favourite BOOLEAN
 createTime TIMESTAMP
+
+transaction
+accfrom INTEGER
+accto INTEGER
+amount INTEGER
+createTime TIMESTAMP
+description CHAR(100)

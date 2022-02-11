@@ -1,4 +1,5 @@
 from calendar import day_abbr
+from hmac import trans_36
 import random
 import PageUI_login
 import database
@@ -53,13 +54,52 @@ def request_addMoreAccount(ncode , alias, AccNumber, initBalance):
     if(int(initBalance) > int(AccNumber.split()[3])):
         return database.Response("unsuccess" , "initial balance should be less than host acount balance" , [])
     else:
-        pass
-        #update old acount
-        #create new account
+        query = "INSERT INTO accounts VALUES ({accnumber},{uncode},{balance},{alias1},{fav},{utime});"
+        rand=random.SystemRandom()
+        newAccNumber=rand.randint(10000000, 99999999)
+        query = query.format(accnumber =newAccNumber  , uncode=ncode , balance=0 , alias1=alias ,fav='False' , utime=time.time())
+        res = database.handleQuery(query)
+        if(res.result == "success"):
+            ret=request_getAccounts(ncode)
+            global userAccounts
+            userAccounts = ret.entries
+            #update old acount
+            #create new account
+
+        res =request_Transfer(AccNumber.split()[1] , newAccNumber, initBalance)
+        if(res.result == "success"):
+            ret=request_getAccounts(ncode)
+            return ret
 
     return
 
-def request_deleteAccount(AccNumber):
+def request_deleteAccount(AccNumber ,targetAccNumber):
+    
+    query = "SELECT FROM accounts WHERE (accnumber==\"{accnumber}\")"
+    query = query.format(accnumber = AccNumber)
+    res = database.handleQuery(query)
+
+    if (res.result=="unsuccess"):
+        return res
+
+    deleteAcc=res.entries[0]
+
+    query2 = "SELECT FROM accounts WHERE (accnumber==\"{accnumber}\")"
+    query2 = query2.format(accnumber = targetAccNumber)
+    res2 = database.handleQuery(query2)
+
+    if (res2.result=="unsuccess"):
+        res2.message="target account not found"
+        return res2
+
+    targetAcc=res2.entries[0]
+
+
+    res3 = request_Transfer(AccNumber , targetAccNumber , deleteAcc.balance)
+    if (res3.result=="unsuccess"):
+        res3.message="transfer unsuccessful, try again later"
+        return res3
+    
     query = "DELETE FROM accounts WHERE (accnumber==\"{accnumber}\")"
     query = query.format(accnumber = AccNumber)
     res = database.handleQuery(query)
@@ -85,7 +125,7 @@ def request_Transfer(accFrom , accTo , amount):
 
     if(res1.result == "unsuccess"):
         return res1
-    if(len(res1.entries) == 0 or int(res1.entries[0].balance) <= int(amount)):
+    if(len(res1.entries) == 0 or int(res1.entries[0].balance) < int(amount)):
         res1.message="not enough money in host acc"
         return res1
     
@@ -98,7 +138,12 @@ def request_Transfer(accFrom , accTo , amount):
     if(res2.result == "unsuccess"):
         return res2
 
-    accountTo = res1.entries[0]
+    accountTo = res2.entries[0]
+
+    if(accountFrom.accnumber == accountTo.accnumber):
+        res2.message="you cant trasfer to same account, selcet another account"
+        res2.result="unsuccess"
+        return res2
 
 
     query3 = "UPDATE accounts WHERE (accnumber==\"{accfrom}\") VALUES {v1},{v2},{v3},{v4},{v5},{v6}"
@@ -114,7 +159,19 @@ def request_Transfer(accFrom , accTo , amount):
     if(res3.result == "unsuccess"):
         return res3
 
-    return
+    return res3
+
+def request_TransferByAlias(accFrom , alias , amount):
+    query1 = "SELECT FROM accounts WHERE (alias==\"{a}\")"
+    query1 = query1.format(a = alias)
+    res1 = database.handleQuery(query1)
+
+    if(res1.result == "unsuccess"):
+        res1.message="no target account found"
+        return res1
+    
+    accountTo = res1.entries[0]
+    return request_Transfer(accFrom , accountTo.accnumber , amount)
 
 
 
@@ -123,5 +180,4 @@ def request_Transfer(accFrom , accTo , amount):
 
 
     
-
-request_Transfer(30713458 , 30713451 , 10)
+#request_Transfer(30713454 , 30713453 , 10)

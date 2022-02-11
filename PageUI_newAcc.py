@@ -19,7 +19,7 @@ def makeNewAccUI(parrentWin):
     te_ncode=Entry(win , textvariable=alias)
     te_ncode.place(x=60 , y=70)
 
-    lbl_initBalance=Label(win , text="alias: ")
+    lbl_initBalance=Label(win , text="init balance: ")
     lbl_initBalance.place(x=20 , y=100 )
 
     initBalance=StringVar(win)
@@ -27,7 +27,20 @@ def makeNewAccUI(parrentWin):
     te_initBalance.place(x=60 , y=100)
 
     def click_btn_openacc():
-        client.request_addMoreAccount(client.user.ncode , alias.get() , PageUI_dashboard.lbx_accounts.get(PageUI_dashboard.lbx_accounts.curselection()[0]) , initBalance.get())
+        try:
+            PageUI_dashboard.lbx_accounts.curselection()[0]
+        except:
+            messagebox.showwarning("no account selected" , "you need to select an account first")
+            parrentWin.deiconify()
+            win.destroy()
+            return
+        ret = client.request_addMoreAccount(client.user.ncode , alias.get() , PageUI_dashboard.lbx_accounts.get(PageUI_dashboard.lbx_accounts.curselection()[0]) , initBalance.get())
+        if(ret.result == "unsuccess"):
+            messagebox.showwarning(ret.result , ret.message)
+        else:
+            parrentWin.deiconify()
+            win.destroy()
+            PageUI_dashboard.refreshAccLiat(PageUI_dashboard.lbx_accounts)
         return
 
     btn_openacc = Button(win , text = "   open new Acount   " , command=click_btn_openacc )

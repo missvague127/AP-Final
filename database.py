@@ -59,6 +59,26 @@ class AccountEntry(MyEntry):
     def prettyStr(self):
         return self.accnumber+" "+self.alias+" "+self.balance
 
+class TransactionEntry(MyEntry):
+    def __init__(self , accfrom, accto, amount, time, desc):
+        self.accfrom = accfrom
+        self.accto=accto
+        self.amount = amount
+        self.time=time
+        self.desc = desc
+
+    def __eq__(self , other):
+        if (self.accfrom == other.accfrom and self.accto == other.accto ):
+            if(self.time == other.time and self.amount==other.amount):
+                if(self.desc==other.desc):
+                    return True
+        return False
+    
+    def __str__(self):
+        return self.accfrom+"\t"+self.accto+"\t"+self.amount+"\t"+self.time+"\t"+self.desc
+
+    
+
 
 
 def handleQuery(q):
@@ -295,7 +315,9 @@ def handleDeleteQuery(q):
     fa =open("_"+tableName+".txt" , 'a')
     fa.write(fields)
     for i in range(len(allEntries)):
-        fa.write(str(allEntries[i])+"\n")
+        fa.write(str(allEntries[i]))
+        if(i<len(allEntries)-1):
+            fa.write("\n")
     fa.close()
 
     
@@ -340,7 +362,9 @@ def handleUpdateQuery(q):
     fa =open("_"+tableName+".txt" , 'a')
     fa.write(fields)
     for i in range(len(allEntries)):
-        fa.write(str(allEntries[i])+"\n")
+        fa.write(str(allEntries[i]))
+        if(i<len(allEntries)-1):
+            fa.write("\n")
     fa.close()
     return Response("success" , "" , [])
 

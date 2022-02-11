@@ -3,6 +3,8 @@ from tkinter import messagebox
 import client
 import PageUI_newFirstAcc
 import PageUI_newAcc
+import PageUI_deleteAcc
+import PageUI_transfer
 
 lbx_accounts=""
 
@@ -54,12 +56,44 @@ def makeDashboardUI(parrentWin):
         if (not lbx_accounts.curselection()):
             messagebox.showwarning("no account selected" , "you need to select an account first")
             return
-        res = client.request_deleteAccount(lbx_accounts.get(lbx_accounts.curselection()[0]).split()[1])
-        refreshAccLiat(lbx_accounts)
+        PageUI_deleteAcc.makeDeleteAccUI(win)
+        #res = client.request_deleteAccount(lbx_accounts.get(lbx_accounts.curselection()[0]).split()[1])
+        #refreshAccLiat(lbx_accounts)
         return
 
     btn_deleteacc = Button(win , text = "   delete Acount   " , command=click_btn_deleteacc )
     btn_deleteacc.place(relx=1 , x=-5 ,y=50 , anchor = NE)
+
+
+
+    def click_btn_transfer():
+        global lbx_accounts
+        if (not lbx_accounts.curselection()):
+            messagebox.showwarning("no account selected" , "you need to select an account first")
+            return
+        PageUI_transfer.makeTransferUI(win)
+        #res = client.request_deleteAccount(lbx_accounts.get(lbx_accounts.curselection()[0]).split()[1])
+        #refreshAccLiat(lbx_accounts)
+        return
+
+    btn_transfer = Button(win , text = "   transfer   " , command=click_btn_transfer )
+    btn_transfer.place(relx=1 , x=-5 ,y=80 , anchor = NE)
+
+    def click_btn_refresh():
+        global lbx_accounts
+
+        client.request_getAccounts(client.user.ncode)
+        if(len(client.userAccounts)==0):
+            lbl_name.config(text=client.user.name+"\nyou have no account yet")
+        else:
+            lbx_accounts.delete(0,END)
+            for i in range(len(client.userAccounts)):
+                lbx_accounts.insert(i,str(i+1)+". "+(client.userAccounts[i].prettyStr()))
+        
+        return
+
+    btn_refresh = Button(win , text = "   refresh   " , command=click_btn_refresh )
+    btn_refresh.place(x=20 , y=200)
 
     
     
@@ -75,6 +109,7 @@ def makeDashboardUI(parrentWin):
     return
 
 def refreshAccLiat(lbx_accounts):
+        client.request_getAccounts(client.user.ncode)
         lbx_accounts.delete(0,END)
         for i in range(len(client.userAccounts)):
             lbx_accounts.insert(i,str(i+1)+". "+(client.userAccounts[i].prettyStr()))
