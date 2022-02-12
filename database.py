@@ -93,6 +93,9 @@ class LoanEntry():
 
     def __str__(self):
         return self.ncode+"\t"+self.number+"\t"+self.accnumber+"\t"+self.amount+"\t"+self.remain
+    
+    def prettyStr(self):
+        return self.ncode+" # " + self.number + " # "+ self.accnumber+" # "+self.amount+" # "+self.remain
 
     def __eq__(self , other):
         if(self.number == other.number and self.accnumber == other.accnumber):

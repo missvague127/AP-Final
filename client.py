@@ -243,7 +243,7 @@ def request_newLoan(ncode , accNumber):
 def threadFunction (accnumber , loanNumber):
     remain=1
     while (remain > 0):
-        time.sleep(2)
+        time.sleep(3)
         #1. select loan
         query2 = "SELECT FROM loan WHERE (number==\"{num}\")"
         query2 = query2.format(num = loanNumber)

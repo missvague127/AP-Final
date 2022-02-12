@@ -10,7 +10,7 @@ def makeLoanUI(parrentWin):
     win.title("loan")
 
     lbx_loans=Listbox(win , width=40)
-    lbx_loans.place(x=20 , y=40)
+    lbx_loans.place(x=20 , y=60)
 
     client.request_getLoans(client.user.ncode)
     if(len(client.userLoans)==0):
@@ -19,7 +19,7 @@ def makeLoanUI(parrentWin):
     else:
         lbx_loans.delete(0,END)
         for i in range(len(client.userLoans)):
-            lbx_loans.insert(i,str(i+1)+". "+(str(client.userLoans[i])))
+            lbx_loans.insert(i,str(i+1)+". "+(client.userLoans[i].prettyStr()))
 
         
 
