@@ -1,12 +1,14 @@
 from calendar import day_abbr
 from hmac import trans_36
 import random
+import threading
 import PageUI_login
 import database
 import time
 
 user=""
 userAccounts=""
+userLoans=""
 #this method is called inside ui
 def request_login(username , password):
     # create a select query and ask database
@@ -198,8 +200,89 @@ def request_Transactions(ncode):
 
     return transactions
         
-    
+def request_getLoans(ncode):
+    query = "SELECT FROM loan WHERE (ncode==\"{ncode}\")"
+    query = query.format(ncode = ncode)
+    res = database.handleQuery(query)
+    global userLoans
+    userLoans = res.entries
+    return res
 
+def request_newLoan(ncode , accNumber):
+
+    query1 = "SELECT FROM accounts WHERE (accnumber==\"{accfrom}\")"
+    query1 = query1.format(accfrom = accNumber)
+    res1 = database.handleQuery(query1)
+
+    if(res1.result == "unsuccess"):
+        return res1
+
+    targetAcc= res1.entries[0]
+
+    query4 = "UPDATE accounts WHERE (accnumber==\"{accto}\") VALUES {v1},{v2},{v3},{v4},{v5},{v6}"
+    query4 = query4.format(accto = targetAcc.accnumber ,v1 = targetAcc.accnumber , v2 = targetAcc.ownerNcode,v3 = int(targetAcc.balance) + 240 ,v4 = targetAcc.alias,v5 = targetAcc.fav,v6 = targetAcc.createTime)
+    res3 = database.handleQuery(query4)
+    if(res3.result == "unsuccess"):
+        return res3
+
+    query = "INSERT INTO loan VALUES ({uncode},{number},{accnumber},{amount},{remain});"
+    rand=random.SystemRandom()
+    r=rand.randint(10000000, 99999999)
+    query = query.format(uncode=ncode , number=r , accnumber=accNumber ,amount=240 , remain=240)
+    res = database.handleQuery(query)
+    if(res.result == "unsuccess"):
+        return res
+
+    
+    newThread = threading.Thread(target=threadFunction , args = (targetAcc.accnumber , r))
+    newThread.start()
+
+    return res
+
+
+def threadFunction (accnumber , loanNumber):
+    remain=1
+    while (remain > 0):
+        time.sleep(2)
+        #1. select loan
+        query2 = "SELECT FROM loan WHERE (number==\"{num}\")"
+        query2 = query2.format(num = loanNumber)
+        res2 = database.handleQuery(query2)
+        if(res2.result == "unsuccess"):
+            return res2
+
+        thisLoan=res2.entries[0]
+
+        if(int(thisLoan.remain) > 0):
+            query1 = "SELECT FROM accounts WHERE (accnumber==\"{num}\")"
+            query1 = query1.format(num = accnumber)
+            res1 = database.handleQuery(query1)
+
+            if(res1.result == "unsuccess"):
+                return res1
+
+            targetAcc= res1.entries[0]
+
+            query4 = "UPDATE accounts WHERE (accnumber==\"{num}\") VALUES {v1},{v2},{v3},{v4},{v5},{v6}"
+            query4 = query4.format(num = accnumber ,v1 = targetAcc.accnumber , v2 = targetAcc.ownerNcode,v3 = int(targetAcc.balance) - 20,v4 = targetAcc.alias,v5 = targetAcc.fav,v6 = targetAcc.createTime)
+            res3 = database.handleQuery(query4)
+            if(res3.result == "unsuccess"):
+                return res3
+
+            query5 = "UPDATE loan WHERE (number==\"{num}\") VALUES {v1},{v2},{v3},{v4},{v5}"
+            query5 = query5.format(num = thisLoan.number ,v1 = thisLoan.ncode , v2 = thisLoan.number, v3 = thisLoan.accnumber ,v4 = thisLoan.amount,v5 = int(thisLoan.remain) - 20 )
+            res5 = database.handleQuery(query5)
+            if(res5.result == "unsuccess"):
+                return res5
+
+            
+
+            remain=int(thisLoan.remain) - 20
+
+
+
+
+    return 
 
 
 

@@ -6,6 +6,7 @@ import PageUI_newAcc
 import PageUI_deleteAcc
 import PageUI_transfer
 import PageUI_transactions
+import PageUI_loan
 
 lbx_accounts=""
 
@@ -30,11 +31,6 @@ def makeDashboardUI(parrentWin):
         for i in range(len(client.userAccounts)):
             lbx_accounts.insert(i,str(i+1)+". "+(client.userAccounts[i].prettyStr()))
         
-        #ts=""
-        #for e in myAccs.entries:
-            #ts=ts+str(e)+"\n"
-        #lbl_name.config(text=client.user.name+"\n"+ts)
-
     
     def click_btn_openacc():
         if(len(client.userAccounts)==0):
@@ -88,6 +84,29 @@ def makeDashboardUI(parrentWin):
 
     btn_transaction = Button(win , text = "   transactions   " , command=click_btn_transactions )
     btn_transaction.place(relx=1 , x=-5 ,y=110 , anchor = NE)
+
+
+    def click_btn_loan():
+        
+        PageUI_loan.makeLoanUI(win)
+        return
+    btn_loan = Button(win , text = "   loans   " , command=click_btn_loan)
+    btn_loan.place(relx=1 , x=-5 ,y=140 , anchor = NE)
+
+
+
+    def click_btn_requestloan():
+        if (not lbx_accounts.curselection()):
+            messagebox.showwarning("no account selected" , "you need to select an account first")
+            return
+        ret = client.request_newLoan(client.user.ncode , lbx_accounts.get(lbx_accounts.curselection()[0]).split()[1])
+        if(ret.result == "unsuccess"):
+            return ret
+        refreshAccLiat(lbx_accounts)
+        #PageUI_loan.makeLoanUI(win)
+        return
+    btn_requestloan = Button(win , text = "   request loan   " , command=click_btn_requestloan)
+    btn_requestloan.place(relx=1 , x=-5 ,y=170 , anchor = NE)
 
 
     def click_btn_refresh():

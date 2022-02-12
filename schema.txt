@@ -20,3 +20,10 @@ accto INTEGER
 amount INTEGER
 createTime TIMESTAMP
 description CHAR(100)
+
+loan
+ncode INTEGER
+number UNIQUE INTEGER
+accnumber INTEGER
+amount INTEGER
+remain INTEGER

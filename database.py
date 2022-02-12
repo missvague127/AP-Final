@@ -1,3 +1,6 @@
+from operator import truediv
+
+
 class Table():
     def __init__(self , name , fields):
         self.name=name
@@ -80,7 +83,24 @@ class TransactionEntry(MyEntry):
     def prettyStr(self):
         return self.accfrom+"  -->  "+self.accto+"    "+self.amount
 
-    
+class LoanEntry():
+    def __init__(self , ncode ,number , accnumber , amount , remain):
+        self.ncode = ncode
+        self.number = number
+        self.accnumber = accnumber
+        self.amount = amount
+        self.remain = remain
+
+    def __str__(self):
+        return self.ncode+"\t"+self.number+"\t"+self.accnumber+"\t"+self.amount+"\t"+self.remain
+
+    def __eq__(self , other):
+        if(self.number == other.number and self.accnumber == other.accnumber):
+            if (self.amount == other.amount and self.ncode == other.ncode):
+                return True
+
+        return False
+
 
 
 
@@ -171,6 +191,9 @@ def OneCondResult(t,c):
                     elif(t=="transaction"):
                         entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
                         ret.append(entry)
+                    elif(t=="loan"):
+                        entry = LoanEntry(values[0],values[1],values[2],values[3],values[4])
+                        ret.append(entry)
 
     return ret
     
@@ -216,6 +239,9 @@ def selectAll(t):
         elif(t=="transaction"):
             entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
             ret.append(entry)
+        elif(tableName=="loan"):
+            entry = LoanEntry(values[0],values[1],values[2],values[3],values[4])
+            ret.append(entry)
 
     return ret
 
@@ -255,6 +281,8 @@ def handleInsertQuery(q):
                 entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
             elif(tableName=="transaction"):
                 entry = TransactionEntry(values[0],values[1],values[2],values[3],values[4])
+            elif(tableName=="loan"):
+                entry = LoanEntry(values[0],values[1],values[2],values[3],values[4])
             return Response("success" ,"" , [entry])
 
 def checkFiledType(type , value):
@@ -359,8 +387,12 @@ def handleUpdateQuery(q):
         i=i+1
     
     for i in range(len(entries)):
-         entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
-         allEntries.append(entry)
+        if(tableName == "accounts"):
+            entry = AccountEntry(values[0],values[1],values[2],values[3],values[4],values[5])
+            allEntries.append(entry)
+        elif(tableName == "loan"):
+            entry = LoanEntry(values[0],values[1],values[2],values[3],values[4])
+            allEntries.append(entry)
 
     fr =open("_"+tableName+".txt" , 'r')
     lines=fr.readlines()
